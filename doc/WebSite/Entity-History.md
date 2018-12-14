@@ -117,6 +117,8 @@ The preferred approach is using the **UseCase** attribute. Example:
     public virtual async Task AssignIssueAsync(AssignIssueInput input)
     {
         // ...
+
+        await _unitOfWorkManager.Current.SaveChangesAsync();
     }
 
 ##### UseCase Attribute Restrictions
@@ -150,7 +152,7 @@ You can use the **IEntityChangeSetReasonProvider.Use(...)** method as shown belo
             {
                 ...
 
-                _unitOfWorkManager.Current.SaveChanges();
+                await _unitOfWorkManager.Current.SaveChangesAsync();
             }
         }
     }
@@ -158,10 +160,15 @@ You can use the **IEntityChangeSetReasonProvider.Use(...)** method as shown belo
 The Use method returns an IDisposable and it **must be disposed**. Once the return
 value is disposed, the Reason is automatically restored to the previous value.
 
+### Owned Entities
+
+Entity History tracks changes to owned entities as entity changes.
+The primary key of the owner entity is saved as the **entity id**.
+
 ### Notes
 
 -   A property must be **public** in order to be saved in the change logs.
     Private and protected properties are ignored.
 -   DisableAuditing takes priority over the Audited attribute.
--   Entity History only works for entities.
+-   Entity History only works for entities and owned entities.
 -   Entity History only works for scalar properties, e.g. string, int, bool...
